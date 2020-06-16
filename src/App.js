@@ -6,7 +6,9 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      currentItem: "",
+      currentItem: {
+        name: ''
+      },
       todos: [
         { name: 'laundry' },
         { name: 'buy groceries' },
@@ -16,16 +18,21 @@ class App extends React.Component {
   }
 
   handleChange(event){
-    this.setState(() => {
-      return { currentItem : event.target.value }
+    this.setState({
+      currentItem: {
+        name: event.target.value 
+      }
     })
-    event.preventDefault()
   }
 
-  handleSubmit() {
-    this.setState((state) => {
-      return { todos: [state.todos, state.currentItem] }
+  handleSubmit(event) {
+    this.setState({
+       todos: this.state.todos.concat(this.state.currentItem),
+       currentItem: {
+         name: ''
+       }
     })
+    event.preventDefault()
   }
 
   render() {
