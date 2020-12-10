@@ -1,48 +1,41 @@
-import React from 'react';
+import React, { useReducer } from 'react';
 import ToDoList from './ToDoList'
 import NewToDo from './NewToDo'
 
-class App extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      currentItem: {
-        name: ''
-      },
-      todos: [
-        { name: 'laundry' },
-        { name: 'buy groceries' },
-        { name: 'mow lawn' }
-      ]
-    }
-  }
+const initialToDos={
+	todos: [
+		{ id: 0, done: true, name: 'laundry' },
+		{ id: 1, done: false, name: 'buy groceries' },
+		{ id: 2, done: false, name: 'mow lawn' }
+	]
+};
 
-  handleChange(event){
-    this.setState({
-      currentItem: {
-        name: event.target.value 
-      }
-    })
-  }
 
-  handleSubmit(event) {
-    this.setState({
-       todos: this.state.todos.concat(this.state.currentItem),
-       currentItem: {
-         name: ''
-       }
-    })
-    event.preventDefault()
-  }
+function ToDoReducer(state, action){
+		switch (action.type){
+				case 'add_todo':
+						const newTodo = {...action.value};
+						newTodo.id = Math.max(...state.todos.map(i=> (isFinite(i.id) ? i.id : 0 )))+1;
+						return {...state, todos: [...state.todos, newTodo]};
 
-  render() {
-    return (
-      <div className="App">
-        <ToDoList todos={ this.state.todos} />
-        <NewToDo onChange={ this.handleChange.bind(this) } onSubmit={ this.handleSubmit.bind(this)} />
-      </div>
-    );
-  }
+				case 'delete_todo':
+						return {...state, todos: state.todos.filter( todo => todo.id!==action.value ) }
+
+				case 'toggle_done':
+						return {...state, todos: state.todos.map( todo => todo.id!==action.value ? todo : {...todo, done: !todo.done} ) };
+
+				default:
+						return state;
+		}
 }
 
-export default App;
+export default function App(){
+	const [state, dispatch] = useReducer(ToDoReducer, initialToDos);
+
+	return (
+		<div className="App">
+			<ToDoList dispatch={ dispatch } todos={ state.todos } />
+			<NewToDo dispatch={ dispatch }/>
+		</div>
+	);
+}
